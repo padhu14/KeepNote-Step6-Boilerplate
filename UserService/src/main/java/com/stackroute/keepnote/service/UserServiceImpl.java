@@ -1,8 +1,16 @@
 package com.stackroute.keepnote.service;
 
+import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.stackroute.keepnote.exceptions.UserAlreadyExistsException;
 import com.stackroute.keepnote.exceptions.UserNotFoundException;
 import com.stackroute.keepnote.model.User;
+import com.stackroute.keepnote.repository.UserRepository;
 
 /*
 * Service classes are used here to implement additional business logic/validation 
@@ -13,14 +21,17 @@ import com.stackroute.keepnote.model.User;
 * better. Additionally, tool support and additional behavior might rely on it in the 
 * future.
 * */
-
+@Service
 public class UserServiceImpl implements UserService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	/*
 	 * Autowiring should be implemented for the UserRepository. (Use
 	 * Constructor-based autowiring) Please note that we should not create any
 	 * object using the new keyword.
 	 */
+	@Autowired
+	private UserRepository userRepository;
 
 	/*
 	 * This method should be used to save a new user.Call the corresponding method
@@ -29,7 +40,18 @@ public class UserServiceImpl implements UserService {
 
 	public User registerUser(User user) throws UserAlreadyExistsException {
 
-		return null;
+		if (userRepository.existsById(user.getUserId())) {
+			throw new UserAlreadyExistsException("");
+		} else {
+			LOGGER.info("User is not found now saving process started");
+			user.setUserAddedDate(new Date());
+			User user2 = userRepository.insert(user);
+			if (user2 == null) {
+				throw new UserAlreadyExistsException("");
+			}
+			return user2;
+		}
+
 	}
 
 	/*
@@ -37,9 +59,14 @@ public class UserServiceImpl implements UserService {
 	 * method of Respository interface.
 	 */
 
-	public User updateUser(String userId,User user) throws UserNotFoundException {
+	public User updateUser(String userId, User user) throws UserNotFoundException {
+		if (getUserById(userId) != null) {
+			userRepository.save(user);
+			return user;
+		} else {
+			throw new UserNotFoundException("");
+		}
 
-		return null;
 	}
 
 	/*
@@ -48,8 +75,11 @@ public class UserServiceImpl implements UserService {
 	 */
 
 	public boolean deleteUser(String userId) throws UserNotFoundException {
-
-		return false;
+		if (userId == null) {
+			return false;
+		}
+		userRepository.delete(getUserById(userId));
+		return true;
 	}
 
 	/*
@@ -59,7 +89,7 @@ public class UserServiceImpl implements UserService {
 
 	public User getUserById(String userId) throws UserNotFoundException {
 
-		return null;
+		return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(""));
 	}
 
 }
