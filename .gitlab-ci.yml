@@ -14,4 +14,6 @@ connect:
   image: mysql
   script:
   - apt-get update && apt-get --assume-yes install mysql-client
+  - apt-get --assume-yes install mysql-server
+  - systemctl start mysql
   - echo "SELECT 'OK';" | mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host="$MYSQL_HOST" "$MYSQL_DATABASE"
