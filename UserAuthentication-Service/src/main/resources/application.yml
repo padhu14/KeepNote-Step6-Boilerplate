@@ -4,6 +4,7 @@ spring:
     username: root
     password: root
   jpa:
+    database: mysql
     hibernate:
       ddl-auto: update
     show-sql: true
