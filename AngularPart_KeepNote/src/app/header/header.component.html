@@ -1,0 +1,14 @@
+<mat-toolbar color="primary">Keep
+
+	<div class="keep-c-toggle-view">
+		<i *ngIf="isNoteView" class="material-icons switchToListView" (click)="switchToListView()">view_list</i>
+		<i *ngIf="!isNoteView" class="material-icons switchToNoteView" (click)="switchToNoteView()">view_quilt</i>
+
+
+		<div class="btn-group">
+			<button type="button" *ngIf="userId != null" class="btn btn-primary" (click)="logoutUser()">
+				Logout
+			</button>
+		</div>
+	</div>
+</mat-toolbar>
