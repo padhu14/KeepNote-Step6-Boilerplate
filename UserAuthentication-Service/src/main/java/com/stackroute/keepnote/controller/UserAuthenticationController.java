@@ -6,16 +6,21 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stackroute.keepnote.model.User;
 import com.stackroute.keepnote.service.UserAuthenticationService;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -80,7 +85,7 @@ public class UserAuthenticationController {
 	 */
 
 	@PostMapping("/api/v1/auth/login")
-	public ResponseEntity<String> loginUser(@RequestBody User user) {
+	public ResponseEntity<?> loginUser(@RequestBody User user) {
 		String jwToken = "";
 		Map<String, String> map = new HashMap<>();
 		try {
@@ -90,14 +95,29 @@ public class UserAuthenticationController {
 				map.clear();
 				map.put("message", "User Successfully");
 				map.put("token", jwToken);
-				return new ResponseEntity<String>("Logged In", HttpStatus.OK);
+				return new ResponseEntity<>(map, HttpStatus.OK);
 			}
 			return new ResponseEntity<String>("LogIn Failed", HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
 			map.clear();
-			map.put("token", e.getMessage());
+			map.put("message", e.getMessage());
 			map.put("token", null);
 			return new ResponseEntity<String>("User not found", HttpStatus.UNAUTHORIZED);
+		}
+	}
+
+	@RequestMapping(method = RequestMethod.POST, path = "/api/v1/auth/isAuthenticated")
+	public ResponseEntity<?> isAuthenticated(@RequestHeader("Authorization") String token) {
+		Map<String, Boolean> map = new HashMap<>();
+		try {
+			token = token.replaceAll("Bearer ", "");
+			final Claims claims = Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody();
+			map.put("isAuthenticated",
+					new Date().before(claims.getExpiration()) && new Date().after(claims.getIssuedAt()));
+			return new ResponseEntity<>(map, HttpStatus.OK);
+		} catch (Exception e) {
+			map.put("isAuthenticated", false);
+			return new ResponseEntity<>(map, HttpStatus.OK);
 		}
 	}
 
@@ -106,10 +126,9 @@ public class UserAuthenticationController {
 		if (null == username || null == password) {
 			throw new ServletException("Username or Password can't be Empty");
 		}
-		final long EXPIRATIONTIME = 1000;
-		String jwToken = Jwts.builder().setSubject(username).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATIONTIME))
-				.signWith(SignatureAlgorithm.HS256, "secretkey").compact();
+		Date date = new Date();
+		String jwToken = Jwts.builder().setSubject(username).setIssuedAt(date)
+				.setExpiration(DateUtils.addMinutes(date, 5)).signWith(SignatureAlgorithm.HS256, "secret").compact();
 		return jwToken;
 	}
 

@@ -40,6 +40,25 @@ public class User {
 	private String userRole;
 	@Column(name = "user_added_date")
 	private Date userAddedDate;
+	
+
+	public User() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public User(String userId, String firstName, String lastName, String userPassword, String userRole,
+			Date userAddedDate) {
+		super();
+		this.userId = userId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.userPassword = userPassword;
+		this.userRole = userRole;
+		this.userAddedDate = userAddedDate;
+	}
+
+
 
 	public String getUserId() {
 		return userId;
