@@ -1,5 +1,6 @@
 services:
 - mysql
+- mariadb
 
 variables:
   # Configure mysql service (https://hub.docker.com/_/mysql/)
@@ -7,24 +8,10 @@ variables:
   MYSQL_ROOT_PASSWORD: root
   MYSQL_PASSWORD: root
   MYSQL_USER: root
-  MYSQL_HOST: localhost
+  MYSQL_HOST: mysql
   
 connect:
   image: mysql
   script:
-  - service mysql start
+  - apt-get update && apt-get --assume-yes install mysql-client
   - echo "SELECT 'OK';" | mysql --user=root --password="$MYSQL_ROOT_PASSWORD" --host="$MYSQL_HOST" "$MYSQL_DATABASE"
-
-
-image: maven:3.3.9-jdk-8
-maven-build:
-  script: "mvn package -U"
-  stage: build
-maven-test:
-  script: "mvn test"
-  stage: test
-stages:
-  - test
-  - build
-  
-
