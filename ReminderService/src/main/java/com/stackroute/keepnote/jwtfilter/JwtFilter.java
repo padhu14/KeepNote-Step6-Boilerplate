@@ -1,6 +1,6 @@
 package com.stackroute.keepnote.jwtfilter;
 
-
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.mongodb.util.JSONParseException;
@@ -17,37 +17,33 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-
-
 /* This class implements the custom filter by extending org.springframework.web.filter.GenericFilterBean.  
  * Override the doFilter method with ServletRequest, ServletResponse and FilterChain.
  * This is used to authorize the API access for the application.
  */
 
-
 public class JwtFilter extends GenericFilterBean {
 
-	
-	
-	
-
 	/*
-	 * Override the doFilter method of GenericFilterBean.
-     * Retrieve the "authorization" header from the HttpServletRequest object.
-     * Retrieve the "Bearer" token from "authorization" header.
-     * If authorization header is invalid, throw Exception with message. 
-     * Parse the JWT token and get claims from the token using the secret key
-     * Set the request attribute with the retrieved claims
-     * Call FilterChain object's doFilter() method */
-	
-	
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException, ServletException {
+	 * Override the doFilter method of GenericFilterBean. Retrieve the
+	 * "authorization" header from the HttpServletRequest object. Retrieve the
+	 * "Bearer" token from "authorization" header. If authorization header is
+	 * invalid, throw Exception with message. Parse the JWT token and get claims
+	 * from the token using the secret key Set the request attribute with the
+	 * retrieved claims Call FilterChain object's doFilter() method
+	 */
 
-    	HttpServletRequest request = (HttpServletRequest) req;
+	@Override
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
+			throws IOException, ServletException {
+
+		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
-		String authHeader = request.getHeader("authorization");
-		if ("OPTION".equals(request.getMethod())) {
+		response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, request.getHeader(HttpHeaders.ORIGIN));
+		response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");
+		response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET,PUT,DELETE");
+		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if ("OPTIONS".equals(request.getMethod())) {
 			response.setStatus(HttpServletResponse.SC_OK);
 			filterChain.doFilter(request, response);
 		} else {
@@ -56,7 +52,7 @@ public class JwtFilter extends GenericFilterBean {
 			}
 			String token = authHeader.split(" ")[1].trim();
 			try {
-				final Claims claims = Jwts.parser().setSigningKey("apple").parseClaimsJws(token).getBody();
+				final Claims claims = Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody();
 				request.setAttribute("claims", claims);
 				filterChain.doFilter(request, response);
 			} catch (JSONParseException e) {
@@ -64,6 +60,5 @@ public class JwtFilter extends GenericFilterBean {
 			}
 		}
 
-
-    }
+	}
 }

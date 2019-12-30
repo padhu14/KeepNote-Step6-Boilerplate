@@ -9,6 +9,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.mongodb.util.JSONParseException;
@@ -38,8 +39,11 @@ public class JwtFilter extends GenericFilterBean {
 
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
-		String authHeader = request.getHeader("authorization");
-		if ("OPTION".equals(request.getMethod())) {
+		response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, request.getHeader(HttpHeaders.ORIGIN));
+		response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");
+		response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET,PUT,DELETE");
+		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if ("OPTIONS".equals(request.getMethod())) {
 			response.setStatus(HttpServletResponse.SC_OK);
 			filterChain.doFilter(request, response);
 		} else {
@@ -48,7 +52,7 @@ public class JwtFilter extends GenericFilterBean {
 			}
 			String token = authHeader.split(" ")[1].trim();
 			try {
-				final Claims claims = Jwts.parser().setSigningKey("apple").parseClaimsJws(token).getBody();
+				final Claims claims = Jwts.parser().setSigningKey("secret").parseClaimsJws(token).getBody();
 				request.setAttribute("claims", claims);
 				filterChain.doFilter(request, response);
 			} catch (JSONParseException e) {

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.stackroute.keepnote.exception.CategoryNotFoundException;
@@ -126,6 +127,17 @@ public class CategoryController {
 			Category category = categoryService.getCategoryById(id);
 			
 			return new ResponseEntity<Category>(category, HttpStatus.OK);
+
+		} catch (Exception e) {
+			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, path = "/api/v1/category")
+	public ResponseEntity<?> getCategoryAllByUserId(@RequestParam String userId) {
+		try {
+			
+			return new ResponseEntity<List<Category>>(categoryService.getAllCategoryByUserId(userId), HttpStatus.OK);
 
 		} catch (Exception e) {
 			return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);

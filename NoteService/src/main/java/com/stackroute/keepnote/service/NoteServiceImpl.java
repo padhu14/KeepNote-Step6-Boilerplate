@@ -117,8 +117,12 @@ public class NoteServiceImpl implements NoteService {
 	 * This method should be used to get all notes with specific userId.
 	 */
 	public List<Note> getAllNoteByUserId(String userId) {
+		try {
+			return noteRepository.findById(userId).get().getNotes();
+		} catch (NoSuchElementException e) {
+			return new ArrayList<>();
+		}
 
-		return noteRepository.findById(userId).get().getNotes();
 	}
 
 }
