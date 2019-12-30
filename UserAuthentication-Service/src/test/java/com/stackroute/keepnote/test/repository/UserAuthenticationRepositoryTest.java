@@ -48,7 +48,6 @@ public class UserAuthenticationRepositoryTest {
     }
 
     @Test
-    @Ignore
     public void testRegisterUserSuccess() {
         autheticationRepository.save(user);
         User object = autheticationRepository.findById(user.getUserId()).get();
@@ -56,7 +55,6 @@ public class UserAuthenticationRepositoryTest {
     }
 
     @Test
-    @Ignore
     public void testLoginUserSuccess() {
         autheticationRepository.save(user);
         User object = autheticationRepository.findById(user.getUserId()).get();
